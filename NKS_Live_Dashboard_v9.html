@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NKS Live Operations Dashboard v9 — Alcove Realty</title>
+<style>
+:root{
+  --navy:#1B2A4A;--navy-l:#243660;--gold:#C9A84C;--gold-l:#E8C97A;
+  --white:#FFFFFF;--bg:#EEF1F8;--border:#DDE3EE;--card:#FFFFFF;
+  --green:#27AE60;--green-l:#E9F7EF;
+  --gold-a:#C9A84C;--gold-al:#FDF6E3;
+  --orange:#E67E22;--orange-l:#FEF0E6;
+  --red:#C0392B;--red-l:#FDEDEC;
+  --blue:#1A5276;--blue-l:#EBF5FB;
+  --purple:#6C3483;--purple-l:#F4ECF7;
+  --grey:#7F8C8D;--grey-l:#F4F6FA;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh;}
+
+/* LOGIN */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--navy);}
+.login-box{background:white;border-radius:14px;padding:52px 44px;width:400px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.35);}
+.login-logo{background:var(--navy);color:var(--gold);font-size:12px;font-weight:700;letter-spacing:2px;padding:10px 22px;border-radius:6px;display:inline-block;margin-bottom:6px;}
+.login-sub{color:var(--grey);font-size:12px;margin-bottom:6px;}
+.login-project{color:var(--navy);font-size:13px;font-weight:700;margin-bottom:30px;}
+.login-box h2{color:var(--navy);font-size:20px;margin-bottom:22px;font-weight:600;}
+.login-box input{width:100%;padding:13px 16px;border:2px solid var(--border);border-radius:8px;font-size:15px;margin-bottom:14px;outline:none;transition:border .2s;}
+.login-box input:focus{border-color:var(--gold);}
+.login-btn{width:100%;padding:14px;background:var(--navy);color:var(--gold);border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;}
+.login-btn:hover{background:var(--navy-l);}
+.login-error{color:var(--red);font-size:13px;margin-top:8px;display:none;}
+
+/* MAIN */
+#mainApp{display:none;}
+
+/* HEADER */
+.header{background:var(--navy);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:500;box-shadow:0 2px 16px rgba(0,0,0,.25);}
+.hbrand{color:var(--gold);font-size:11px;font-weight:700;letter-spacing:2px;}
+.htitle{color:white;font-size:15px;font-weight:700;margin-top:2px;}
+.hright{display:flex;align-items:center;gap:14px;}
+.live-badge{display:flex;align-items:center;gap:6px;background:rgba(39,174,96,.15);border:1px solid rgba(39,174,96,.4);padding:5px 13px;border-radius:20px;}
+.live-dot{width:8px;height:8px;background:#27AE60;border-radius:50%;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.live-text{color:#27AE60;font-size:12px;font-weight:600;}
+.ts{color:rgba(255,255,255,.45);font-size:11px;}
+.logout-btn{background:rgba(201,168,76,.12);border:1px solid var(--gold);color:var(--gold);padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;}
+
+/* DATE BANNER */
+.date-banner{background:var(--navy-l);color:rgba(255,255,255,.7);font-size:12px;text-align:center;padding:6px;letter-spacing:.5px;}
+.date-banner span{color:var(--gold);font-weight:700;}
+
+/* CONTENT */
+.content{padding:22px 28px;max-width:1600px;margin:0 auto;}
+
+/* LEGEND */
+.legend{display:flex;align-items:center;gap:14px;background:white;border-radius:10px;padding:11px 18px;margin-bottom:20px;box-shadow:0 2px 8px rgba(27,42,74,.06);flex-wrap:wrap;}
+.leg-title{font-size:11px;font-weight:700;color:var(--grey);letter-spacing:.8px;text-transform:uppercase;margin-right:4px;}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--navy);font-weight:500;}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.ld-green{background:var(--green);}
+.ld-gold{background:var(--gold-a);}
+.ld-orange{background:var(--orange);}
+.ld-red{background:var(--red);}
+.ld-navy{background:var(--navy);}
+
+/* ZONE */
+.zone-section{margin-bottom:30px;}
+.zone-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.zone-title{font-size:17px;font-weight:700;color:var(--navy);}
+.zone-sub{font-size:12px;color:var(--grey);}
+.zone-divider{flex:1;height:2px;background:linear-gradient(to right,var(--gold),transparent);}
+
+/* TEAM GRID */
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+
+/* TEAM CARD */
+.team-card{background:var(--card);border-radius:12px;padding:0;box-shadow:0 2px 10px rgba(27,42,74,.08);cursor:pointer;transition:all .2s;border:2px solid transparent;overflow:hidden;}
+.team-card:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(27,42,74,.14);}
+.team-card.s-green{border-color:var(--green);}
+.team-card.s-gold{border-color:var(--gold-a);}
+.team-card.s-orange{border-color:var(--orange);}
+.team-card.s-red{border-color:var(--red);}
+.team-card.s-navy{border-color:var(--navy);}
+.team-card.s-none{border-color:var(--border);}
+.team-card.s-priority{border-color:var(--red);border-width:3px;box-shadow:0 0 0 2px rgba(192,57,43,.2);}
+
+.card-top{padding:13px 15px 10px;display:flex;align-items:flex-start;justify-content:space-between;}
+.card-name{font-size:14px;font-weight:700;color:var(--navy);}
+.card-zone-tag{font-size:10px;font-weight:600;color:var(--grey);letter-spacing:.8px;text-transform:uppercase;margin-top:2px;}
+.notif-badge{display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
+.nb-green{background:var(--green-l);color:var(--green);}
+.nb-gold{background:var(--gold-al);color:#8a6d00;}
+.nb-orange{background:var(--orange-l);color:var(--orange);}
+.nb-red{background:var(--red-l);color:var(--red);}
+.nb-navy{background:var(--blue-l);color:var(--navy);}
+.nb-none{background:var(--grey-l);color:var(--grey);}
+.nb-priority{background:var(--red-l);color:var(--red);font-weight:900;}
+.ndot{width:7px;height:7px;border-radius:50%;}
+.nd-green{background:var(--green);}
+.nd-gold{background:var(--gold-a);}
+.nd-orange{background:var(--orange);}
+.nd-red{background:var(--red);}
+.nd-navy{background:var(--navy);}
+.nd-none{background:var(--grey);}
+
+/* METRICS */
+.card-metrics{display:grid;gap:1px;background:var(--border);border-top:1px solid var(--border);}
+.card-metrics.cols3{grid-template-columns:repeat(3,1fr);}
+.card-metrics.cols4{grid-template-columns:repeat(4,1fr);}
+.card-metrics.cols2{grid-template-columns:repeat(2,1fr);}
+.metric-cell{background:white;padding:10px 8px;text-align:center;}
+.metric-val{font-size:19px;font-weight:700;color:var(--navy);line-height:1;}
+.metric-val.c-red{color:var(--red);}
+.metric-val.c-orange{color:var(--orange);}
+.metric-val.c-green{color:var(--green);}
+.metric-val.c-gold{color:#8a6d00;}
+.metric-val.c-blue{color:var(--blue);}
+.metric-val.c-navy{color:var(--navy);}
+.metric-val.c-purple{color:var(--purple);}
+.metric-lbl{font-size:9px;color:var(--grey);font-weight:600;letter-spacing:.4px;text-transform:uppercase;margin-top:2px;}
+
+/* AMOUNTS ROW */
+.card-amounts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);}
+.amount-cell{background:#FAFBFD;padding:8px 6px;text-align:center;}
+.amount-val{font-size:12px;font-weight:700;color:var(--navy);}
+.amount-val.c-green{color:var(--green);}
+.amount-val.c-red{color:var(--red);}
+.amount-lbl{font-size:9px;color:var(--grey);font-weight:600;letter-spacing:.4px;text-transform:uppercase;margin-top:1px;}
+
+.card-footer{padding:8px 15px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-ts{font-size:10px;color:var(--grey);}
+.card-arrow{font-size:15px;color:var(--gold);font-weight:700;}
+
+/* PRIORITY FLASH */
+@keyframes priorityFlash{0%,100%{background:white}50%{background:#FDEDEC}}
+.priority-flash{animation:priorityFlash 2s infinite;}
+
+/* ══ OVERLAY L1 ══ */
+.overlay{display:none;position:fixed;inset:0;background:rgba(27,42,74,.6);z-index:600;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.panel{background:white;border-radius:16px;width:94%;max-width:920px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.3);}
+.panel-hdr{background:var(--navy);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-radius:16px 16px 0 0;position:sticky;top:0;z-index:10;}
+.panel-title{color:var(--gold);font-size:16px;font-weight:700;}
+.panel-sub{color:rgba(255,255,255,.55);font-size:12px;margin-top:2px;}
+.panel-close{background:rgba(201,168,76,.15);border:1px solid var(--gold);color:var(--gold);padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;}
+.panel-body{padding:22px;}
+
+.sum-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:18px;}
+.sum-card{background:var(--bg);border-radius:10px;padding:13px 10px;text-align:center;border-left:4px solid var(--gold);}
+.sum-card.dc-red{border-left-color:var(--red);}
+.sum-card.dc-orange{border-left-color:var(--orange);}
+.sum-card.dc-green{border-left-color:var(--green);}
+.sum-card.dc-gold{border-left-color:var(--gold-a);}
+.sum-card.dc-navy{border-left-color:var(--navy);}
+.sum-card.dc-blue{border-left-color:var(--blue);}
+.sum-card.dc-purple{border-left-color:var(--purple);}
+.sc-val{font-size:24px;font-weight:700;color:var(--navy);}
+.sc-lbl{font-size:10px;color:var(--grey);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-top:3px;}
+
+.section-title{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--gold);}
+
+/* UNIT TABLE */
+.unit-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px;}
+.unit-table th{background:var(--navy);color:var(--gold);padding:8px 10px;text-align:left;font-size:11px;letter-spacing:.4px;font-weight:700;}
+.unit-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+.unit-table tr:hover td{background:var(--grey-l);}
+.unit-table tr.u-priority td{background:#FFF0EE;}
+.unit-no{font-weight:700;color:var(--navy);font-family:'Courier New',monospace;font-size:13px;}
+.unit-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.3px;}
+.ub-priority{background:var(--red-l);color:var(--red);border:1px solid var(--red);}
+.ub-pending{background:var(--orange-l);color:var(--orange);}
+.ub-done{background:var(--green-l);color:var(--green);}
+.ub-model{background:var(--purple-l);color:var(--purple);}
+.ub-day90{background:var(--blue-l);color:var(--navy);font-weight:900;}
+.ub-od60{background:var(--red-l);color:var(--red);}
+.ub-od30{background:var(--orange-l);color:var(--orange);}
+.concern-mini{font-size:11px;color:var(--grey);margin-top:2px;}
+
+.view-btn{background:var(--navy);color:var(--gold);border:none;padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;font-weight:600;white-space:nowrap;}
+.view-btn:hover{background:var(--navy-l);}
+
+.info-box{background:var(--gold-al);border-left:4px solid var(--gold-a);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--navy);}
+.info-box.alert{background:var(--red-l);border-left-color:var(--red);}
+
+/* SOURCE TAGS */
+.source-tag{display:inline-block;background:var(--blue-l);color:var(--blue);padding:2px 8px;border-radius:8px;font-size:11px;font-weight:500;margin:2px 2px 2px 0;}
+
+/* ══ OVERLAY L2 ══ */
+.overlay2{display:none;position:fixed;inset:0;background:rgba(27,42,74,.75);z-index:700;align-items:center;justify-content:center;}
+.overlay2.open{display:flex;}
+.panel2{background:white;border-radius:14px;width:90%;max-width:640px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.35);}
+.panel2-hdr{background:var(--navy);padding:15px 22px;display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0;position:sticky;top:0;z-index:10;}
+.panel2-title{color:var(--gold);font-size:15px;font-weight:700;font-family:'Courier New',monospace;}
+.panel2-sub{color:rgba(255,255,255,.55);font-size:11px;margin-top:2px;}
+.panel2-close{background:rgba(201,168,76,.15);border:1px solid var(--gold);color:var(--gold);padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;}
+.panel2-body{padding:20px;}
+
+.concern-row{background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:8px;border-left:4px solid var(--border);}
+.concern-row.cr-pending{border-left-color:var(--orange);}
+.concern-row.cr-done{border-left-color:var(--green);}
+.concern-row.cr-priority{border-left-color:var(--red);}
+.cr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+.cr-area{font-size:12px;font-weight:700;color:var(--navy);}
+.cr-desc{font-size:12px;color:var(--grey);}
+.cr-cat{font-size:11px;color:var(--blue);font-weight:600;}
+
+.u-info-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);}
+.u-info-row:last-child{border-bottom:none;}
+.uir-label{font-size:12px;color:var(--grey);}
+.uir-val{font-size:12px;font-weight:700;color:var(--navy);text-align:right;}
+
+/* FOOTER */
+.footer{background:var(--navy);color:rgba(255,255,255,.4);font-size:11px;text-align:center;padding:14px;letter-spacing:.5px;margin-top:36px;}
+.footer span{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">ALCOVE REALTY · NEW KOLKATA</div>
+    <div class="login-sub">Directors Dashboard · Confidential</div>
+    <div class="login-project">New Kolkata Sangam — Live Operations</div>
+    <h2>🔒 Secure Access</h2>
+    <input type="password" id="loginPw" placeholder="Enter password" onkeypress="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">Enter Dashboard</button>
+    <div class="login-error" id="loginErr">Incorrect password.</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="mainApp">
+  <div class="header">
+    <div>
+      <div class="hbrand">ALCOVE REALTY · NEW KOLKATA · SANGAM</div>
+      <div class="htitle">Live Operations Dashboard</div>
+    </div>
+    <div class="hright">
+      <div class="ts" id="lastUpdated">Loading...</div>
+      <div class="live-badge"><div class="live-dot"></div><div class="live-text" id="liveBadge">Sample Data</div></div>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="date-banner">Data as on <span>27 June 2026 (Saturday)</span> &nbsp;·&nbsp; New Kolkata Sangam</div>
+
+  <div class="content">
+    <div class="legend">
+      <span class="leg-title">Alert Key</span>
+      <div class="leg-item"><div class="leg-dot ld-green"></div>Updated / Good</div>
+      <div class="leg-item"><div class="leg-dot ld-gold"></div>TAT Breach</div>
+      <div class="leg-item"><div class="leg-dot ld-orange"></div>30+ Days</div>
+      <div class="leg-item"><div class="leg-dot ld-red"></div>60+ Days / Priority</div>
+      <div class="leg-item"><div class="leg-dot ld-navy"></div>90th Day</div>
+    </div>
+    <div id="zonesContainer"></div>
+  </div>
+
+  <div class="footer"><span>Alcove Realty · New Kolkata Sangam</span> · Directors Dashboard · Confidential — Internal Use Only</div>
+</div>
+
+<!-- L1 PANEL -->
+<div class="overlay" id="overlay1" onclick="closeL1(event)">
+  <div class="panel" id="panel1">
+    <div class="panel-hdr">
+      <div><div class="panel-title" id="p1Title"></div><div class="panel-sub" id="p1Sub"></div></div>
+      <button class="panel-close" onclick="closeOverlay1()">✕ Close</button>
+    </div>
+    <div class="panel-body" id="p1Body"></div>
+  </div>
+</div>
+
+<!-- L2 PANEL -->
+<div class="overlay2" id="overlay2" onclick="closeL2(event)">
+  <div class="panel2" id="panel2">
+    <div class="panel2-hdr">
+      <div><div class="panel2-title" id="p2Title"></div><div class="panel2-sub" id="p2Sub"></div></div>
+      <button class="panel2-close" onclick="closeOverlay2()">✕ Close</button>
+    </div>
+    <div class="panel2-body" id="p2Body"></div>
+  </div>
+</div>
+
+<script>
+const CONFIG={password:"Qwertyu1@",sheetURL:"",refreshInterval:60000};
+
+// ══════════════════════════════════════════════
+// REAL NKS DATA — as on 27 June 2026
+// ══════════════════════════════════════════════
+const NKS_DATA = {
+
+  // ── SANGAM ──────────────────────────────────
+  sangam_sales:{
+    name:"Sales Team", zone:"Sangam", status:"green", lastUpdate:"27/06/2026 18:46",
+    metrics:[
+      {val:"12",  lbl:"Fresh Visits",   cls:"c-green"},
+      {val:"38",  lbl:"Total Visits",   cls:""},
+      {val:"140", lbl:"Month Visits",   cls:"c-blue"},
+      {val:"02",  lbl:"VC Today",       cls:""},
+    ],
+    amounts:{rcvd:"₹1.16 Cr", due:"₹16.28 Cr (Month)", overdue:"NIL"},
+    detail:{
+      summary:[
+        {val:"12",lbl:"Fresh Visits",cls:"dc-green"},
+        {val:"00",lbl:"Re-Visit",cls:"dc-gold"},
+        {val:"17",lbl:"Existing Visit",cls:"dc-blue"},
+        {val:"06",lbl:"Others Visit",cls:"dc-navy"},
+        {val:"140",lbl:"Month Visits",cls:"dc-blue"},
+        {val:"20",lbl:"Month VC",cls:"dc-purple"},
+        {val:"28",lbl:"Month Bookings",cls:"dc-green"},
+        {val:"01",lbl:"Month Cancel",cls:"dc-red"},
+      ],
+      amtCards:[
+        {val:"₹1.16 Cr",lbl:"Today's Collection",cls:"c-green"},
+        {val:"₹16.28 Cr",lbl:"Month Collection",cls:"c-green"},
+        {val:"₹16.75 Cr",lbl:"Month Booking Value",cls:"c-blue"},
+      ],
+      sources:[
+        "Current Project Buyer","Facebook (3)","New Kolkata Landing Page (4)","Website","Other Broker — Saikat Roy, Elegance Enterprises, Rajen Ram"
+      ],
+      vcSources:["New Kolkata Landing Page (2)"],
+      plotBreakdown:"Plot A: ₹18,05,000  |  Plot B: ₹98,31,665",
+      monthPlot:"Plot A: ₹66,39,261  |  Plot B: ₹1,56,163,453.68",
+      bookingToday:"NIL",
+      cancellation:"NIL"
+    }
+  },
+
+  sangam_crm:{
+    name:"CRM Team", zone:"Sangam", status:"green", lastUpdate:"27/06/2026 18:46",
+    metrics:[
+      {val:"1,883",lbl:"Registered",   cls:"c-green"},
+      {val:"1,868",lbl:"Handed Over",  cls:"c-blue"},
+      {val:"15",   lbl:"Reg. Not HO",  cls:"c-orange"},
+      {val:"64",   lbl:"Query Not Reg",cls:"c-red"},
+    ],
+    amounts:{rcvd:"₹1.16 Cr", due:"—", overdue:"—"},
+    detail:{
+      summary:[
+        {val:"2,533",lbl:"Total Sold",cls:"dc-green"},
+        {val:"831",lbl:"Unsold",cls:"dc-navy"},
+        {val:"1,947",lbl:"Query Received",cls:"dc-blue"},
+        {val:"1,883",lbl:"Registered",cls:"dc-green"},
+        {val:"1,868",lbl:"Handed Over",cls:"dc-blue"},
+        {val:"64",lbl:"Query Not Reg.",cls:"dc-red"},
+        {val:"15",lbl:"Reg. Not HO",cls:"dc-orange"},
+        {val:"79",lbl:"Targeted for HO",cls:"dc-gold"},
+      ],
+      towerData:[
+        {t:"T1",sold:74,unsold:150,reg:3,ho:2},
+        {t:"T2",sold:88,unsold:136,reg:3,ho:2},
+        {t:"T3",sold:151,unsold:73,reg:7,ho:6},
+        {t:"T4",sold:89,unsold:73,reg:0,ho:0},
+        {t:"T5",sold:212,unsold:4,reg:210,ho:210},
+        {t:"T6",sold:207,unsold:9,reg:207,ho:207},
+        {t:"T7",sold:207,unsold:8,reg:202,ho:202},
+        {t:"T9",sold:137,unsold:87,reg:109,ho:103},
+        {t:"T10",sold:87,unsold:137,reg:0,ho:0},
+        {t:"T11",sold:130,unsold:94,reg:1,ho:0},
+        {t:"T12",sold:126,unsold:30,reg:120,ho:118},
+        {t:"T13",sold:201,unsold:7,reg:199,ho:199},
+        {t:"T14",sold:196,unsold:12,reg:195,ho:192},
+        {t:"T15",sold:196,unsold:11,reg:195,ho:195},
+        {t:"T16",sold:432,unsold:0,reg:432,ho:432},
+      ]
+    }
+  },
+
+  sangam_ocs:{
+    name:"OCS / Estate Team", zone:"Sangam", status:"red", lastUpdate:"24/06/2026",
+    metrics:[
+      {val:"35",lbl:"Snag Pending",  cls:"c-red"},
+      {val:"469",lbl:"With Snag HO", cls:"c-orange"},
+      {val:"434",lbl:"Snag Done",    cls:"c-green"},
+      {val:"1",  lbl:"PRIORITY",     cls:"c-red"},
+    ],
+    amounts:{rcvd:"—", due:"—", overdue:"—"},
+    detail:{
+      summary:[
+        {val:"1,868",lbl:"Total HO",cls:"dc-green"},
+        {val:"469",lbl:"HO With Snag",cls:"dc-orange"},
+        {val:"434",lbl:"Snag Done",cls:"dc-green"},
+        {val:"35",lbl:"Snag Pending",cls:"dc-red"},
+        {val:"1",lbl:"PRIORITY",cls:"dc-red"},
+        {val:"3",lbl:"Model Flats",cls:"dc-purple"},
+      ],
+      units:[
+        {no:"T9-5C",  ho:"31.05.2026",raised:"31.05.2026",priority:true, model:false,
+         concerns:[
+           {area:"Bed Room-1",cat:"Carpentry",desc:"Door is jammed and it is very hard to open and close",status:"Pending"},
+           {area:"Main Door",cat:"Civil",desc:"Entire main door frame proper finishing required",status:"Pending"},
+           {area:"Main Door",cat:"Carpentry",desc:"Main door lock issue",status:"Pending"},
+           {area:"Main Door",cat:"Civil",desc:"Entire door frame crack — escalated to Mr. Chinmoy Sir",status:"Pending"},
+           {area:"Main Door",cat:"Carpentry",desc:"Chipped laminate near lock",status:"Pending"},
+         ]},
+        {no:"T9-16H", ho:"22.05.2026",raised:"30.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Main Door",cat:"Carpentry",desc:"Alignment issue",status:"Pending"},
+           {area:"Kitchen",cat:"Counter top",desc:"Proper finishing required near the open joint",status:"Pending"},
+           {area:"Kitchen",cat:"Counter top",desc:"Kadapa stone crack",status:"Pending"},
+           {area:"Living Balcony",cat:"Civil",desc:"Sloping issue near gratings in opposite direction",status:"Pending"},
+           {area:"Common Toilet",cat:"Civil",desc:"Hollow tiles — needs to be fitted properly",status:"Pending"},
+           {area:"Master Bedroom",cat:"Civil",desc:"3 NOS hollow tiles — proper fixing required",status:"Pending"},
+           {area:"Master Bedroom",cat:"Crack tiles",desc:"Skirting tiles broken",status:"Pending"},
+           {area:"Master Bedroom",cat:"Civil",desc:"Skirting tiles not fixed properly",status:"Pending"},
+           {area:"Living & Dining",cat:"Civil",desc:"Tiles hollow and not fitted properly near common bathroom",status:"Pending"},
+         ]},
+        {no:"T9-2C",  ho:"23.05.2026",raised:"09.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Master Bedroom",cat:"Civil",desc:"Hollow tiles — customer will not accept replacement",status:"Pending"},
+           {area:"Master Bedroom",cat:"Civil",desc:"Hollow tiles near attach washroom",status:"Pending"},
+           {area:"MBR Toilet",cat:"Civil",desc:"Hollow tiles — customer will not accept replacement",status:"Pending"},
+           {area:"Common Toilet",cat:"Civil",desc:"Hollow tiles — customer will not accept replacement",status:"Pending"},
+           {area:"Bed Room-1",cat:"Civil",desc:"Hollow tiles — customer will not accept replacement",status:"Pending"},
+         ]},
+        {no:"T9-14B", ho:"20.05.2026",raised:"25.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Master Bedroom",cat:"Civil",desc:"Door backside proper finishing required near skirting",status:"Pending"},
+           {area:"MBR Toilet",cat:"Chipped tiles",desc:"Wall tiles chipped",status:"Pending"},
+         ]},
+        {no:"T9-22C", ho:"22.05.2026",raised:"23.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Bed Room-1",cat:"Civil",desc:"Wall chipped near window",status:"Pending"},
+         ]},
+        {no:"T9-27B", ho:"23.05.2026",raised:"24.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Kitchen",cat:"Civil",desc:"Crack Kadapa stone",status:"Pending"},
+           {area:"Bed Room-2",cat:"Carpentry",desc:"Door lock broken",status:"Pending"},
+           {area:"Kitchen",cat:"Civil",desc:"Cementing not properly done below kitchen slab near skirting",status:"Pending"},
+         ]},
+        {no:"T9-28C", ho:"24.05.2026",raised:"24.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Living Balcony",cat:"Civil",desc:"Wall chipped near sliding door",status:"Pending"},
+           {area:"Living Balcony",cat:"Façade",desc:"Left side sliding door jammed",status:"Pending"},
+           {area:"Additional",cat:"Civil",desc:"Bed 2 wall seepage found",status:"Pending"},
+         ]},
+        {no:"T9-4B",  ho:"30.05.2026",raised:"02.06.2026",priority:false,model:false,
+         concerns:[
+           {area:"MBR Toilet",cat:"Putty",desc:"Proper grouting required around WC",status:"Pending"},
+           {area:"MBR Toilet",cat:"False Ceiling",desc:"False ceiling grid and board needs to be changed",status:"Pending"},
+           {area:"MBR Toilet",cat:"False Ceiling",desc:"Damaged false ceiling",status:"Pending"},
+         ]},
+        {no:"T9-16A", ho:"31.05.2026",raised:"31.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Living & Dining",cat:"Civil",desc:"Seepage mark is visible in the ceiling",status:"Pending"},
+         ]},
+        {no:"T9-17B", ho:"31.05.2026",raised:"31.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"MBR Toilet",cat:"Putty",desc:"All over floor proper grouting required",status:"Pending"},
+           {area:"MBR Toilet",cat:"Crack tiles",desc:"Tiles crack on the floor",status:"Pending"},
+         ]},
+        {no:"T9-19D", ho:"31.05.2026",raised:"31.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Living & Dining",cat:"Civil",desc:"Ceiling hole visible",status:"Pending"},
+           {area:"Bed Room-1",cat:"Carpentry",desc:"Door gap visible and jammed — door not closing properly",status:"Pending"},
+         ]},
+        {no:"T9-20C", ho:"03.06.2026",raised:"05.06.2026",priority:false,model:false,
+         concerns:[
+           {area:"Bed Room-2",cat:"Façade",desc:"Sliding window jammed — not moving properly",status:"Done"},
+         ]},
+        {no:"T9-20D", ho:"15.05.2026",raised:"15.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Main Door",cat:"Putty",desc:"Putty finishing required near lock",status:"Pending"},
+         ]},
+        {no:"T9-22A", ho:"18.05.2026",raised:"18.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Main Door",cat:"Carpentry",desc:"Chipped laminates near lock and top edges",status:"Pending"},
+           {area:"MBR Toilet",cat:"Carpentry",desc:"Washroom door not closing properly — jammed",status:"Pending"},
+         ]},
+        {no:"T9-3A",  ho:"14.05.2026",raised:"14.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Living Balcony",cat:"Façade",desc:"Sliding door not moving properly and jammed",status:"Pending"},
+           {area:"Common Toilet",cat:"Civil",desc:"Widegap between corners of joint near door frame bottom",status:"Pending"},
+           {area:"MBR Toilet",cat:"Civil",desc:"Widegap between corners of joint near door frame bottom",status:"Pending"},
+         ]},
+        {no:"T9-15A", ho:"31.05.2026",raised:"—",priority:false,model:true,
+         concerns:[{area:"Model Flat",cat:"—",desc:"Previously used as model flat — pending works not yet addressed",status:"Pending"}]},
+        {no:"T9-15B", ho:"31.05.2026",raised:"—",priority:false,model:true,
+         concerns:[{area:"Model Flat",cat:"—",desc:"Previously used as model flat — pending works not yet addressed",status:"Pending"}]},
+        {no:"T9-15G", ho:"17.05.2026",raised:"—",priority:false,model:true,
+         concerns:[{area:"Model Flat",cat:"—",desc:"Previously used as model flat — pending works not yet addressed",status:"Pending"}]},
+        {no:"T12-11C",ho:"10.05.2026",raised:"14.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Living Balcony",cat:"Façade",desc:"Sliding door jammed not sliding properly",status:"Pending"},
+         ]},
+        {no:"T12-16D",ho:"09.05.2026",raised:"09.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Master Bedroom",cat:"Putty",desc:"Putty finishing required near wall edges",status:"Pending"},
+           {area:"MBR Toilet",cat:"Putty",desc:"Putty finishing required near door frame edges and wall tiles",status:"Pending"},
+           {area:"Bed Room-2",cat:"Carpentry",desc:"Door misalignment",status:"Pending"},
+           {area:"Bed Room-1",cat:"Carpentry",desc:"Door misalignment",status:"Pending"},
+         ]},
+        {no:"T12-17A",ho:"06.05.2026",raised:"06.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Bed Room-1",cat:"Façade",desc:"Sliding window jammed — not moving properly",status:"Done"},
+         ]},
+        {no:"T12-19D",ho:"03.06.2026",raised:"03.06.2026",priority:false,model:false,
+         concerns:[
+           {area:"Living Balcony",cat:"Electrical",desc:"Proper fixing and grouting required",status:"Pending"},
+           {area:"Kitchen",cat:"Counter top",desc:"Kadapa stone crack",status:"Pending"},
+           {area:"MBR Toilet",cat:"Carpentry",desc:"Door lock not working properly",status:"Pending"},
+         ]},
+        {no:"T12-22E",ho:"25.05.2026",raised:"31.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Main Door",cat:"Putty",desc:"Crack observed near door frame side",status:"Pending"},
+           {area:"Bed Room-1",cat:"Civil",desc:"Proper finishing required near wardrobe area top",status:"Pending"},
+         ]},
+        {no:"T12-2B", ho:"25.05.2026",raised:"26.05.2026",priority:false,model:false,
+         concerns:[
+           {area:"Bed Room-2",cat:"Façade",desc:"Right side window lock issue",status:"Pending"},
+         ]},
+        {no:"T14-13F",ho:"09.04.2026",raised:"10.04.2026",priority:false,model:false,
+         concerns:[
+           {area:"Master Bedroom",cat:"Carpentry",desc:"Bedroom door misalignment",status:"Pending"},
+           {area:"Bed Room-1",cat:"Carpentry",desc:"Bedroom door misalignment",status:"Pending"},
+         ]},
+        {no:"T1-12C", ho:"17.06.2026",raised:"17.06.2026",priority:false,model:false,
+         concerns:[
+           {area:"Kitchen",cat:"Seepage",desc:"Sink bottom wall seepage visible",status:"Pending"},
+           {area:"Common Toilet",cat:"Carpentry",desc:"Door shutter bend top area",status:"Pending"},
+           {area:"Master Bedroom",cat:"Carpentry",desc:"Door shutter bend bottom area",status:"Pending"},
+         ]},
+      ]
+    }
+  },
+
+  sangam_complaints:{
+    name:"Complaint Tracker", zone:"Sangam", status:"green", lastUpdate:"27/06/2026",
+    metrics:[
+      {val:"492",lbl:"Total Raised",  cls:"c-blue"},
+      {val:"6",  lbl:"Pending",       cls:"c-red"},
+      {val:"19", lbl:"In Progress",   cls:"c-orange"},
+      {val:"467",lbl:"Closed",        cls:"c-green"},
+    ],
+    amounts:{rcvd:"—",due:"—",overdue:"—"},
+    detail:{
+      summary:[
+        {val:"492",lbl:"Total",cls:"dc-blue"},
+        {val:"6",lbl:"Pending",cls:"dc-red"},
+        {val:"19",lbl:"In Progress",cls:"dc-orange"},
+        {val:"467",lbl:"Closed",cls:"dc-green"},
+      ],
+      categories:[
+        {cat:"Plumbing",    total:402,pending:5,inProgress:15,closed:382},
+        {cat:"Electrical",  total:73, pending:0,inProgress:2, closed:71},
+        {cat:"Civil",       total:3,  pending:0,inProgress:2, closed:1},
+        {cat:"Housekeeping",total:7,  pending:0,inProgress:0, closed:7},
+        {cat:"Carpentry",   total:2,  pending:1,inProgress:0, closed:1},
+        {cat:"Intercom",    total:2,  pending:0,inProgress:0, closed:2},
+        {cat:"Security",    total:3,  pending:0,inProgress:0, closed:3},
+      ]
+    }
+  },
+
+  sangam_handover:{
+    name:"Handover Status", zone:"Sangam", status:"green", lastUpdate:"27/06/2026",
+    metrics:[
+      {val:"4",  lbl:"HO Today",       cls:"c-green"},
+      {val:"1",  lbl:"Snag Free Today",cls:"c-green"},
+      {val:"3",  lbl:"With Snag Today",cls:"c-orange"},
+      {val:"79", lbl:"Targeted for HO",cls:"c-blue"},
+    ],
+    amounts:{rcvd:"—",due:"—",overdue:"—"},
+    detail:{
+      summary:[
+        {val:"4",lbl:"HO Today",cls:"dc-green"},
+        {val:"1",lbl:"Snag Free Today",cls:"dc-green"},
+        {val:"3",lbl:"With Snag Today",cls:"dc-orange"},
+        {val:"1,868",lbl:"Total HO",cls:"dc-blue"},
+        {val:"79",lbl:"Targeted for HO",cls:"dc-gold"},
+        {val:"15",lbl:"Reg. Not HO",cls:"dc-orange"},
+        {val:"48",lbl:"Desnagging Pending",cls:"dc-red"},
+        {val:"31",lbl:"Desnagging Done",cls:"dc-green"},
+      ],
+      note:"Today's handovers in T9. Scheduled: 10 flats. Extended date given: 6 flats (T3-2, T10-1, T14-3). CNR (Not Contactable): 2 flats (T9-1, T12-1). Not yet called: 3 flats."
+    }
+  },
+
+  // ── TRIVENI ──────────────────────────────────
+  triveni_sales:{
+    name:"Sales Team", zone:"Triveni", status:"green", lastUpdate:"27/06/2026",
+    metrics:[
+      {val:"02",lbl:"Site Visits",    cls:"c-green"},
+      {val:"01",lbl:"Re-Visit",       cls:"c-gold"},
+      {val:"13",lbl:"Month Visits",   cls:"c-blue"},
+      {val:"NIL",lbl:"VC Today",      cls:""},
+    ],
+    amounts:{rcvd:"NIL",due:"NIL",overdue:"NIL"},
+    detail:{
+      summary:[
+        {val:"02",lbl:"Site Visits",cls:"dc-green"},
+        {val:"01",lbl:"Re-Visit",cls:"dc-gold"},
+        {val:"NIL",lbl:"Old Re-Visit",cls:"dc-navy"},
+        {val:"13",lbl:"Month Visits",cls:"dc-blue"},
+        {val:"02",lbl:"Month Old Re-Visit",cls:"dc-gold"},
+        {val:"NIL",lbl:"Month Bookings",cls:"dc-navy"},
+      ],
+      amtCards:[
+        {val:"NIL",lbl:"Today's Collection",cls:""},
+        {val:"NIL",lbl:"Month Collection",cls:""},
+        {val:"NIL",lbl:"Month Booking Value",cls:""},
+      ],
+      sources:["S.W.E Database (2)"],
+      vcSources:["N/A"],
+      plotBreakdown:"Office: 1  |  Retail: 12 (Month breakdown)",
+      monthPlot:"Month Old Re-Visit: Retail — 2",
+      bookingToday:"NIL",
+      cancellation:"NIL"
+    }
+  },
+
+  triveni_crm:{
+    name:"CRM Team", zone:"Triveni", status:"none", lastUpdate:"27/06/2026",
+    metrics:[
+      {val:"NIL",lbl:"Bookings",      cls:""},
+      {val:"NIL",lbl:"Today Coll.",   cls:""},
+      {val:"NIL",lbl:"Month Coll.",   cls:""},
+      {val:"NIL",lbl:"Cancellation",  cls:""},
+    ],
+    amounts:{rcvd:"NIL",due:"NIL",overdue:"NIL"},
+    detail:{
+      summary:[
+        {val:"NIL",lbl:"Today Bookings",cls:"dc-navy"},
+        {val:"NIL",lbl:"Month Bookings",cls:"dc-navy"},
+        {val:"NIL",lbl:"Today Collection",cls:"dc-navy"},
+        {val:"NIL",lbl:"Month Collection",cls:"dc-navy"},
+        {val:"NIL",lbl:"Cancellation",cls:"dc-navy"},
+        {val:"NIL",lbl:"ERP on Hold",cls:"dc-navy"},
+      ],
+      amtCards:[
+        {val:"NIL",lbl:"Today's Collection",cls:""},
+        {val:"NIL",lbl:"Month Collection",cls:""},
+        {val:"NIL",lbl:"Month Booking Value",cls:""},
+      ],
+      note:"No bookings, collections or cancellations recorded for Triveni today."
+    }
+  }
+};
+
+// ZONE CONFIG
+const ZONES=[
+  {id:"triveni",name:"Triveni",sub:"Triveni Mall — Centre",
+   teams:[
+     {id:"triveni_sales",  name:"Sales Team",   zone:"Triveni"},
+     {id:"triveni_crm",    name:"CRM Team",     zone:"Triveni"},
+   ]},
+  {id:"sangam",name:"Sangam",sub:"T1–T16 (excl. T15) · 15 Towers · OCS In Scope",
+   teams:[
+     {id:"sangam_sales",      name:"Sales Team",        zone:"Sangam"},
+     {id:"sangam_crm",        name:"CRM Team",          zone:"Sangam"},
+     {id:"sangam_ocs",        name:"OCS / Estate Team", zone:"Sangam"},
+     {id:"sangam_complaints", name:"Complaint Tracker", zone:"Sangam"},
+     {id:"sangam_handover",   name:"Handover Status",   zone:"Sangam"},
+   ]}
+];
+
+// STATUS HELPERS
+function getStatus(d){ return d.status||"none"; }
+function getStatusLabel(s){return {navy:"90th Day",red:"60+ Days / Priority",orange:"30+ Days",gold:"TAT Breach",green:"Updated",none:"No Alerts",priority:"PRIORITY"}[s]||"—";}
+
+// ══════════════════════════════════════════════
+// RENDER LANDING
+// ══════════════════════════════════════════════
+function render(){
+  const container=document.getElementById('zonesContainer');
+  container.innerHTML='';
+  ZONES.forEach(zone=>{
+    const sec=document.createElement('div');
+    sec.className='zone-section';
+    sec.innerHTML=`
+      <div class="zone-header">
+        <div class="zone-title">${zone.name}</div>
+        <div class="zone-sub">${zone.sub}</div>
+        <div class="zone-divider"></div>
+      </div>
+      <div class="team-grid" id="grid_${zone.id}"></div>`;
+    container.appendChild(sec);
+    const grid=sec.querySelector(`#grid_${zone.id}`);
+    zone.teams.forEach(team=>{
+      const d=NKS_DATA[team.id];
+      if(!d) return;
+      const status=getStatus(d);
+      const label=getStatusLabel(status);
+      const isPriority=team.id==='sangam_ocs';
+      const card=document.createElement('div');
+      card.className=`team-card s-${status}${isPriority?' priority-flash':''}`;
+      card.onclick=()=>openDetail(team.id);
+
+      let metricsHtml='';
+      const cols=d.metrics.length===4?'cols4':d.metrics.length===3?'cols3':'cols2';
+      metricsHtml=`<div class="card-metrics ${cols}">`+d.metrics.map(m=>`
+        <div class="metric-cell">
+          <div class="metric-val ${m.cls}">${m.val}</div>
+          <div class="metric-lbl">${m.lbl}</div>
+        </div>`).join('')+'</div>';
+
+      const amtRed=d.amounts.overdue&&d.amounts.overdue!=='—'&&d.amounts.overdue!=='NIL'?'c-red':'';
+      const rcvdGreen=d.amounts.rcvd&&d.amounts.rcvd!=='—'&&d.amounts.rcvd!=='NIL'?'c-green':'';
+
+      card.innerHTML=`
+        <div class="card-top">
+          <div>
+            <div class="card-name">${d.name}</div>
+            <div class="card-zone-tag">${d.zone} Zone</div>
+          </div>
+          <div class="notif-badge nb-${status}">
+            <div class="ndot nd-${status}"></div>${label}
+          </div>
+        </div>
+        ${metricsHtml}
+        <div class="card-amounts">
+          <div class="amount-cell"><div class="amount-val ${rcvdGreen}">${d.amounts.rcvd}</div><div class="amount-lbl">Collection</div></div>
+          <div class="amount-cell"><div class="amount-val">${d.amounts.due}</div><div class="amount-lbl">Due / Month</div></div>
+          <div class="amount-cell"><div class="amount-val ${amtRed}">${d.amounts.overdue}</div><div class="amount-lbl">Overdue</div></div>
+        </div>
+        <div class="card-footer">
+          <div class="card-ts">🕐 ${d.lastUpdate}</div>
+          <div class="card-arrow">View Details ›</div>
+        </div>`;
+      grid.appendChild(card);
+    });
+  });
+}
+
+// ══════════════════════════════════════════════
+// DETAIL PANELS
+// ══════════════════════════════════════════════
+function openDetail(id){
+  const d=NKS_DATA[id];
+  if(!d) return;
+  document.getElementById('p1Title').textContent=d.name;
+  document.getElementById('p1Sub').textContent=`${d.zone} Zone  ·  Last updated: ${d.lastUpdate}`;
+
+  let html='';
+
+  // Summary cards
+  if(d.detail.summary){
+    html+=`<div class="sum-cards">`+d.detail.summary.map(s=>`
+      <div class="sum-card ${s.cls}"><div class="sc-val">${s.val}</div><div class="sc-lbl">${s.lbl}</div></div>`).join('')+'</div>';
+  }
+
+  // Amount cards
+  if(d.detail.amtCards){
+    html+=`<div class="sum-cards" style="grid-template-columns:repeat(3,1fr);">`+d.detail.amtCards.map(a=>`
+      <div class="sum-card dc-green"><div class="sc-val ${a.cls||'c-green'}">${a.val}</div><div class="sc-lbl">${a.lbl}</div></div>`).join('')+'</div>';
+  }
+
+  // Sales sources
+  if(d.detail.sources){
+    html+=`<div class="section-title">Visit Sources — Today</div>
+    <div style="margin-bottom:14px;">`+d.detail.sources.map(s=>`<span class="source-tag">${s}</span>`).join('')+'</div>';
+    if(d.detail.vcSources && d.detail.vcSources[0]!=='N/A'){
+      html+=`<div style="margin-bottom:6px;font-size:12px;font-weight:600;color:var(--navy);">VC Sources:</div>`+d.detail.vcSources.map(s=>`<span class="source-tag">${s}</span>`).join('')+'<br><br>';
+    }
+    if(d.detail.plotBreakdown){
+      html+=`<div class="info-box"><strong>Today's Collection Breakup:</strong> ${d.detail.plotBreakdown}</div>`;
+    }
+    if(d.detail.monthPlot){
+      html+=`<div class="info-box"><strong>Month Collection Breakup:</strong> ${d.detail.monthPlot}</div>`;
+    }
+  }
+
+  // Complaint categories table
+  if(d.detail.categories){
+    html+=`<div class="section-title">Category-wise Breakdown</div>
+    <table class="unit-table">
+      <thead><tr><th>Category</th><th>Total</th><th>Pending</th><th>In Progress</th><th>Closed</th></tr></thead>
+      <tbody>`+d.detail.categories.map(c=>`
+        <tr>
+          <td><strong>${c.cat}</strong></td>
+          <td>${c.total}</td>
+          <td>${c.pending>0?`<span class="unit-badge ub-pending">${c.pending}</span>`:c.pending}</td>
+          <td>${c.inProgress>0?`<span class="unit-badge ub-od30">${c.inProgress}</span>`:c.inProgress}</td>
+          <td><span class="unit-badge ub-done">${c.closed}</span></td>
+        </tr>`).join('')+'</tbody></table><br>';
+  }
+
+  // CRM tower table
+  if(d.detail.towerData){
+    html+=`<div class="section-title">Tower-wise Status</div>
+    <table class="unit-table">
+      <thead><tr><th>Tower</th><th>Sold</th><th>Unsold</th><th>Registered</th><th>Handed Over</th></tr></thead>
+      <tbody>`+d.detail.towerData.map(t=>`
+        <tr>
+          <td><span class="unit-no">${t.t}</span></td>
+          <td><span class="unit-badge ub-done">${t.sold}</span></td>
+          <td>${t.unsold>0?`<span class="unit-badge ub-od30">${t.unsold}</span>`:t.unsold}</td>
+          <td>${t.reg}</td>
+          <td>${t.ho}</td>
+        </tr>`).join('')+'</tbody></table><br>';
+  }
+
+  // OCS snag units
+  if(d.detail.units){
+    const priorityUnits=d.detail.units.filter(u=>u.priority);
+    const modelUnits=d.detail.units.filter(u=>u.model);
+    const normalUnits=d.detail.units.filter(u=>!u.priority&&!u.model);
+
+    if(priorityUnits.length){
+      html+=`<div class="info-box alert">⚠️ <strong>PRIORITY UNIT — Immediate Attention Required</strong></div>`;
+    }
+    if(modelUnits.length){
+      html+=`<div class="info-box">ℹ️ <strong>Model Flat Units (${modelUnits.length}):</strong> Previously used as model flats — pending works not yet addressed after possession handover.</div>`;
+    }
+
+    html+=`<div class="section-title">Pending Snag Units (${d.detail.units.length} units)</div>
+    <table class="unit-table">
+      <thead><tr><th>Unit No.</th><th>HO Date</th><th>Raised</th><th>Open Concerns</th><th>Flag</th><th></th></tr></thead>
+      <tbody>`+d.detail.units.map(u=>{
+        const pendingCount=u.concerns.filter(c=>c.status==='Pending').length;
+        const rowCls=u.priority?'u-priority':'';
+        const flag=u.priority?'<span class="unit-badge ub-priority">PRIORITY</span>':u.model?'<span class="unit-badge ub-model">MODEL FLAT</span>':'';
+        const topConcern=u.concerns[0];
+        return `<tr class="${rowCls}">
+          <td><span class="unit-no">${u.no}</span></td>
+          <td style="font-size:11px;">${u.ho}</td>
+          <td style="font-size:11px;">${u.raised}</td>
+          <td>
+            <span class="unit-badge ub-pending">${pendingCount} pending</span>
+            <div class="concern-mini">${topConcern?topConcern.area+' · '+topConcern.cat:''}</div>
+          </td>
+          <td>${flag}</td>
+          <td><button class="view-btn" onclick="openUnitDetail('${u.no}','${id}')">View ›</button></td>
+        </tr>`;
+      }).join('')+'</tbody></table>';
+  }
+
+  // Handover note
+  if(d.detail.note){
+    html+=`<div class="info-box" style="margin-top:14px;">📋 ${d.detail.note}</div>`;
+  }
+
+  // Triveni CRM note
+  if(id==='triveni_crm'&&d.detail.note){
+    html+=`<div class="info-box">${d.detail.note}</div>`;
+  }
+
+  document.getElementById('p1Body').innerHTML=html;
+  document.getElementById('overlay1').classList.add('open');
+}
+
+function closeOverlay1(){document.getElementById('overlay1').classList.remove('open');}
+function closeL1(e){if(e.target===document.getElementById('overlay1'))closeOverlay1();}
+
+// Unit detail L2
+function openUnitDetail(unitNo, teamId){
+  const d=NKS_DATA[teamId];
+  if(!d||!d.detail.units) return;
+  const u=d.detail.units.find(x=>x.no===unitNo);
+  if(!u) return;
+
+  document.getElementById('p2Title').textContent=unitNo;
+  document.getElementById('p2Sub').textContent=`${d.name} · ${d.zone} Zone`;
+
+  const pendingCount=u.concerns.filter(c=>c.status==='Pending').length;
+  const doneCount=u.concerns.filter(c=>c.status==='Done').length;
+
+  const concernHtml=u.concerns.map(c=>`
+    <div class="concern-row ${c.status==='Pending'?'cr-pending':c.status==='Done'?'cr-done':''}">
+      <div class="cr-top">
+        <div class="cr-area">${c.area}</div>
+        <span class="unit-badge ${c.status==='Pending'?'ub-pending':'ub-done'}">${c.status}</span>
+      </div>
+      <div class="cr-cat">${c.cat}</div>
+      <div class="cr-desc" style="margin-top:3px;">${c.desc}</div>
+    </div>`).join('');
+
+  document.getElementById('p2Body').innerHTML=`
+    <div class="u-info-row"><div class="uir-label">Unit No.</div><div class="uir-val" style="font-family:Courier New;font-size:15px;">${u.no}</div></div>
+    <div class="u-info-row"><div class="uir-label">Handover Date</div><div class="uir-val">${u.ho}</div></div>
+    <div class="u-info-row"><div class="uir-label">Concern Raised</div><div class="uir-val">${u.raised}</div></div>
+    <div class="u-info-row"><div class="uir-label">Priority</div><div class="uir-val">${u.priority?'<span class="unit-badge ub-priority">YES — PRIORITY</span>':'No'}</div></div>
+    <div class="u-info-row"><div class="uir-label">Model Flat</div><div class="uir-val">${u.model?'<span class="unit-badge ub-model">YES</span>':'No'}</div></div>
+    <div class="u-info-row"><div class="uir-label">Pending Concerns</div><div class="uir-val"><span class="unit-badge ub-pending">${pendingCount}</span></div></div>
+    <div class="u-info-row"><div class="uir-label">Done</div><div class="uir-val"><span class="unit-badge ub-done">${doneCount}</span></div></div>
+    <br>
+    <div class="section-title">All Concerns (${u.concerns.length})</div>
+    ${concernHtml}`;
+
+  document.getElementById('overlay2').classList.add('open');
+}
+
+function closeOverlay2(){document.getElementById('overlay2').classList.remove('open');}
+function closeL2(e){if(e.target===document.getElementById('overlay2'))closeOverlay2();}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+function updateTimestamp(){
+  const el=document.getElementById('lastUpdated');
+  if(el) el.textContent='Refreshed '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+}
+function loadData(){
+  updateTimestamp();
+  render();
+}
+function doLogin(){
+  if(document.getElementById('loginPw').value===CONFIG.password){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('mainApp').style.display='block';
+    loadData();
+    setInterval(loadData,CONFIG.refreshInterval);
+  } else {
+    document.getElementById('loginErr').style.display='block';
+    document.getElementById('loginPw').value='';
+  }
+}
+function doLogout(){
+  document.getElementById('mainApp').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginPw').value='';
+  document.getElementById('loginErr').style.display='none';
+}
+</script>
+</body>
+</html>
